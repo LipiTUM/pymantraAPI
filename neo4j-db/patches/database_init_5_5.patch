@@ -1,0 +1,65 @@
+*** docker-entrypoint.sh	2023-01-02 14:00:30.163975615 +0100
+--- docker-entrypoint_patched.sh	2023-01-11 12:45:36.804203967 +0100
+***************
+*** 490,509 ****
+--- 490,525 ----
+          check_mounted_folder_writable_with_chown "/data/transactions"
+      fi
+  fi
+  
+  if [ -d /licenses ]; then
+      check_mounted_folder_readable "/licenses"
+      : ${NEO4J_server_directories_licenses:="/licenses"}
+  fi
+  
+  
++ # ==== Extract Dumped Database if it exists ====
++ 
++ if [ -d /initdb ]; then
++     check_mounted_folder_readable "/initdb"
++     if [ ! -d /data/databases/neo4j ]; then
++         DUMP_ARCHIVES="/initdb/*.tar.gz"
++         for f in $DUMP_ARCHIVES
++         do
++             cd /data
++             tar xvzf "$f"
++             cd -
++         done
++     fi
++ fi
++ 
++ 
+  # ==== LOAD PLUGINS ====
+  
+  if [[ ! -z "${NEO4J_PLUGINS:-}" ]]; then
+    # NEO4J_PLUGINS should be a json array of plugins like '["graph-algorithms", "apoc", "streams", "graphql"]'
+    install_neo4j_labs_plugins
+  fi
+  
+  # ==== RENAME LEGACY ENVIRONMENT CONF VARIABLES ====
+  
+  # Env variable naming convention:
+***************
+*** 566,585 ****
+--- 582,602 ----
+          else
+              echo >&2 "WARNING: ${setting} not written to conf file because settings that start with a number are not permitted"
+          fi
+      fi
+  done
+  
+  # ==== SET PASSWORD ====
+  
+  set_initial_password "${NEO4J_AUTH:-}"
+  
++ 
+  # ==== INVOKE NEO4J STARTUP ====
+  
+  [ -f "${EXTENSION_SCRIPT:-}" ] && . ${EXTENSION_SCRIPT}
+  
+  if [ "${cmd}" == "dump-config" ]; then
+      if [ ! -d "/conf" ]; then
+          echo >&2 "You must mount a folder to /conf so that the configuration file(s) can be dumped to there."
+          exit 1
+      fi
+      check_mounted_folder_writable_with_chown "/conf"

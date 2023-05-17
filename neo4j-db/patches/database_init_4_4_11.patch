@@ -1,0 +1,25 @@
+--- docker-entrypoint_4_4_11.sh	2023-03-06 16:48:39.910468965 +0100
++++ docker-entrypoint_4_4_11_patched.sh	2023-03-06 17:59:53.585317510 +0100
+@@ -482,6 +482,22 @@
+     : ${NEO4J_dbms_directories_licenses:="/licenses"}
+ fi
+
++
++# ==== Extract Dumped Database if it exists ====
++
++if [ -d /dumps ]; then
++    check_mounted_folder_readable "/dumps"
++    DUMP_ARCHIVES="/dumps/*.dump"
++    for f in $DUMP_ARCHIVES
++    do
++        b=$(basename "$f")
++        db="${b%.*}"
++        echo "File: $f, Database: $db"
++        ${neo4j_admin_cmd} load --from="$f" --database="$db" --force
++    done
++fi
++
++
+ # ==== SET CONFIGURATIONS ====
+
+ ## == DOCKER SPECIFIC DEFAULT CONFIGURATIONS ===

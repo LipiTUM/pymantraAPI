@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  neo4j-db:
+    build:
+      context: "./neo4j-db"
+      dockerfile: "Dockerfile"
+    ports:
+      - "7687:7687"
+      - "7474:7474"
+    volumes:
+      - neo4j-db-data:/data
+      - neo4j-db-import:/var/lib/neo4j/import
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+    networks:
+      - network
+
+  sql-db:
+    image: mariadb:10
+    volumes:
+      - sql-db-data:/var/lib/mysql
+      - sql-db-import:/var/lib/mysql-files
+    environment:
+      - MARIADB_ROOT_PASSWORD=${SQL_PASSWORD}
+      - MARIADB_DATABASE=${SQL_DATABASE}
+    networks:
+      - network
+
+  api:
+    build:
+      context: "./pymantra-api"
+      dockerfile: "Dockerfile"
+    volumes:
+      - neo4j-db-import:/var/lib/neo4j/import
+    environment:
+      - N_WORKERS=${N_WORKERS}
+      - DJANGO_DEBUG=${DJANGO_DEBUG}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+      - DJANGO_ADMIN_USER=${DJANGO_ADMIN_USER}
+      - DJANGO_ADMIN_PASSWORD=${DJANGO_ADMIN_PASSWORD}
+      - DJANGO_ADMIN_EMAIL=${DJANGO_ADMIN_EMAIL}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - SQL_PASSWORD=${SQL_PASSWORD}
+      - SQL_DATABASE=${SQL_DATABASE}
+      - ROOT_DOMAIN=${DJANGO_ROOT_DOMAIN}
+    ports:
+      - "8080:80"
+    networks:
+      - network
+    depends_on:
+      - neo4j-db
+      - sql-db
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "${NGINX_PORT}:80"
+    depends_on:
+      - api
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - network
+
+networks:
+  network:
+
+volumes:
+  neo4j-db-data:
+  neo4j-db-import:
+  sql-db-data:
+  sql-db-import:
+  nginx-conf:

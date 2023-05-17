@@ -1,0 +1,13 @@
+--- patches/verifier.py	2022-12-22 15:03:11.922267898 +0100
++++ patches/verifier_docker.py	2022-12-22 15:03:58.948503932 +0100
+@@ -1,8 +1,8 @@
+ import warnings
+ from typing import Union, Tuple, Set, Dict
+ from neo4j.graph import Node
+-from base import Neo4jBaseConnector
+-from statics import (
++from pymantra.database.base import Neo4jBaseConnector
++from pymantra.statics import (
+     Edge,
+     NODE_TYPES, EDGE_TYPES,
+     NODE_TYPES_BY_EDGE
