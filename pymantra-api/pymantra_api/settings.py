@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", default='foo')
 
 
-ROOT_DOMAIN = os.environ.get('DJANGO_ROOT_DOMAIN', '')
+ROOT_DOMAIN = os.environ.get('ROOT_DOMAIN', default='')
 if os.environ.get("HTTPS", False):
     SESSION_COOKIE_PATH = f"{ROOT_DOMAIN}"
     CSRF_COOKIE_PATH = f"{ROOT_DOMAIN}"
