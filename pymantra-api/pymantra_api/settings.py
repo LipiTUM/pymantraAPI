@@ -19,20 +19,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", default='foo')
 
 
-ROOT_DOMAIN = os.environ.get('ROOT_DOMAIN', default='')
-if os.environ.get("HTTPS", False):
-    SESSION_COOKIE_PATH = f"{ROOT_DOMAIN}"
-    CSRF_COOKIE_PATH = f"{ROOT_DOMAIN}"
-    # this (usually) means we are in a production setting => always turn debug
-    # off as a precaution
-    DEBUG = 0
+ROOT_DOMAIN = os.environ.get('DJANGO_ROOT_DOMAIN', default='')
+DEBUG = int(os.environ.get("DJANGO_DEBUG", default=1))
+if DEBUG:
+    CSRF_COOKIE_SESSION = False
+    SESSION_COOKIE_SECURE = False
 else:
-    DEBUG = int(os.environ.get("DJANGO_DEBUG", default=0))
-CSRF_COOKIE_SESSION = True
-SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SESSION = True
+    SESSION_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = os.environ.get(
-    "DJANGO_ALLOWED_HOSTS", default='127.0.0.1 localhost').split(" ")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", default='127.0.0.1 localhost mantra.ciobio.io').split(" ")
 
 NEO4J_DB = {
     'user': os.environ.get("NEO4J_USER", default='foo'),
@@ -152,6 +148,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = "/app/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
