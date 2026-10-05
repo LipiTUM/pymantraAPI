@@ -17,16 +17,15 @@ class Command(BaseCommand):
             auth = (settings.NEO4J_DB.get('user'), settings.NEO4J_DB.get('password'))
 
 
-            nodes, edges = 0, 0
             print('Checking the neo4j database...')
             with NetworkGenerator(url, auth) as network_generator:
                 n_nodes = network_generator.n_nodes
                 n_edges = network_generator.n_edges
-                print(f"The neo4j database contains {nodes} nodes and {edges} edges.")
+                print(f"The neo4j database contains {n_nodes} nodes and {n_edges} edges.")
             print('Checked the neo4j database.')
 
-            if nodes == 0 and edges == 0:
-                print('neo4j database setup failed!')
+            if n_nodes == 0 and n_edges == 0:
+                raise CommandError('neo4j database setup failed: database is empty!')
 
         except Exception as e:
             traceback = e.__traceback__

@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11
 
 # clone and prepare the pymantra-package repository
 COPY patches patches
@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+# RUN python -m pip debug --verbose && false
 
 # install python project dependencies
 COPY requirements.txt .
